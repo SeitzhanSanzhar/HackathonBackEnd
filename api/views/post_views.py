@@ -15,8 +15,20 @@ class ListCreatePosts(generics.ListCreateAPIView):
     # def perform_create(self, serializer):
     #     serializer.save(user=self.request.user)
     def get_queryset(self):
-        return sorted(Post.objects.all(), key=lambda t: t.like_amount)
-
+        res = sorted(Post.objects.all(), key=lambda t: -t.like_amount)
+        user = self.request.user
+        for x in res:
+            try:
+                like = Like.objects.get(post = x, liker = user)
+                x.is_liked = True
+            except Like.DoesNotExist:
+                x.is_liked = False
+            x.save()
+        return res
+    # def get_context_data(self, **kwargs):
+    #     context = super(ListCreatePosts, self).get_context_data(**kwargs)
+    #     try:
+    #         like = Like.get(post = context, )
 
 class RetrieveUpdateDestroyPosts(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
@@ -34,6 +46,19 @@ def like(request):
 
     return Response(post.like(user))
 
+@api_view(['POST'])
+def unlike(request):
+
+    pk = request.data.get('post_id')
+    token = Token.objects.get(key=request.auth)
+
+    user = User.objects.get(id = token.user_id)
+    post = Post.objects.get(id = pk)
+
+    return Response(post.unlike(user))
+
+
+
 @api_view(['GET'])
 def get_like_amount(request):
     pk = request.data.get('post_id')
@@ -43,3 +68,16 @@ def get_like_amount(request):
         "like_amount": post.like_amount
     }
     return Response(res)
+
+@api_view(['POST'])
+def repost(request):
+    pk = request.data.get('post_id')
+    token = Token.objects.get(key=request.auth)
+
+    user = User.objects.get(id=token.user_id)
+    post = Post.objects.get(id=pk)
+
+    mr = Repost(reposter = user, post = post)
+    mr.save()
+
+    return Response(post.repost(user))

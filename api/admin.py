@@ -8,3 +8,6 @@ from .models import *
 
 admin.site.register(Post)
 admin.site.register(Like)
+admin.site.register(Repost)
+admin.site.register(PostInProcess)
+admin.site.register(Report)
