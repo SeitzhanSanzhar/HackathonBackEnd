@@ -9,5 +9,5 @@ urlpatterns = [
     url('logout/', logout),
     url('signup/', Signup.as_view()),
     url('like/', like),
-    url('get_like_amount/', get_like_amount),
+    url('post_statistics/', get_like_amount),
 ]

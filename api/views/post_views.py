@@ -23,23 +23,21 @@ class RetrieveUpdateDestroyPosts(generics.RetrieveUpdateDestroyAPIView):
 
 @api_view(['POST'])
 def like(request):
+
     pk = request.data.get('post_id')
     token = Token.objects.get(key=request.auth)
+
     user = User.objects.get(id = token.user_id)
-    posts = Post.objects.get(id = pk)
-    post = posts
-    may_be_like = Like.objects.filter(liker = user, post = post)
-    if (may_be_like != None):
-        return Response("already was liked")
-    new_like = Like(liker = user, post = post)
-    new_like.save()
-    return new_like
+    post = Post.objects.get(id = pk)
+
+    return Response(post.like(user))
 
 @api_view(['GET'])
 def get_like_amount(request):
     pk = request.data.get('post_id')
     post = Post.objects.get(id=pk)
     res = {
+        "percentage": post.percentage,
         "like_amount": post.like_amount
     }
     return Response(res)
