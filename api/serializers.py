@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from .models import *
 
+class PostInProcessSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = PostInProcess
+        fields = '__all__'
+
 class PostSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     class Meta:

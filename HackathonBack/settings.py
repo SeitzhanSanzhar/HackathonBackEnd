@@ -25,10 +25,16 @@ SECRET_KEY = '!n=92kw^pjg%e-2pc81r#p=)!20z6wvp-vwmo8=!9j3u_v^0q0'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.10.113.168']
+ALLOWED_HOSTS = ['10.10.113.168',
+                 '172.20.10.2']
 
+STATIC_URL = '/static/'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/Users/sanzar/PycharmProjects/HackathonBack/media/"
 
 # Application definition
+
+CSRF_COOKIE_SECURE = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',

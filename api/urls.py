@@ -11,4 +11,6 @@ urlpatterns = [
     url('remove_l/', unlike),
     url('post_statistics/', get_like_amount),
     url('repost', repost),
+    url('post_in_process/', ListCreatePostInProcess.as_view),
+    url('is_liked/', is_liked),
 ]

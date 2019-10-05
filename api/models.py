@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,AnonymousUser
 from rest_framework import status
 from django.db import models
 
@@ -7,7 +7,7 @@ class Post(models.Model):
 
     STATUSES = NEW, IN_PROGRESS, DONE = range(3)
 
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.CharField(max_length=500)
     post_status = models.IntegerField(choices=zip(STATUSES,STATUSES), default=NEW)
 
     text = models.CharField(max_length=500)
@@ -17,6 +17,7 @@ class Post(models.Model):
     date = models.DateTimeField()
     is_liked = models.BooleanField(default=False)
     ceil = models.IntegerField(default=200)
+    like_cnt = models.IntegerField(default=3)
 
     def like(self, user):
 
