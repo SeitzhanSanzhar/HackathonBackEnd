@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth.models import User
-from django.db import models
-from django.db.models.signals import post_save
 from rest_framework import status
-from django.dispatch import receiver
 from django.db import models
-
-# Create your models here.
 
 #Like model
 
@@ -19,7 +13,9 @@ class Post(models.Model):
     title = models.CharField(max_length=500)
     image = models.ImageField()
     date = models.DateTimeField()
-    ceil = models.IntegerField(default=100)
+
+    ceil_progress = models.IntegerField(default=20)
+    ceil_done = models.IntegerField(default=100)
 
     def like(self, user):
         try:
@@ -29,6 +25,11 @@ class Post(models.Model):
             pass
         new_like = Like(liker = user, post = self)
         new_like.save()
+        if (self.like_amount >= self.ceil_progress):
+            self.post_statues = self.IN_PROGRESS
+        if (self.like_amount >= self.ceil_done):
+            self.post_statues = self.DONE
+        self.save()
         return status.HTTP_200_OK
 
     @property

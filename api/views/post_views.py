@@ -14,6 +14,8 @@ class ListCreatePosts(generics.ListCreateAPIView):
     #permission_classes = [IsAuthenticated]
     # def perform_create(self, serializer):
     #     serializer.save(user=self.request.user)
+    def get_queryset(self):
+        return sorted(Post.objects.all(), key=lambda t: t.like_amount)
 
 
 class RetrieveUpdateDestroyPosts(generics.RetrieveUpdateDestroyAPIView):
