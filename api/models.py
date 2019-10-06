@@ -2,10 +2,11 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User,AnonymousUser
 from rest_framework import status
 from django.db import models
+import datetime
 
 class Post(models.Model):
 
-    STATUSES = NEW, IN_PROGRESS, DONE = range(3)
+    STATUSES = REVIEW, NEW, IN_PROGRESS, DONE = range(4)
 
     author = models.CharField(max_length=500)
     post_status = models.IntegerField(choices=zip(STATUSES,STATUSES), default=NEW)
@@ -17,10 +18,9 @@ class Post(models.Model):
     date = models.DateTimeField()
     is_liked = models.BooleanField(default=False)
     ceil = models.IntegerField(default=200)
-    like_cnt = models.IntegerField(default=3)
+    like_cnt = models.IntegerField(default=0)
 
     def like(self, user):
-
         try:
             may_be_like = Like.objects.get(liker = user, post = self)
             return "already_was_liked_by_this_user"
@@ -61,34 +61,44 @@ class Post(models.Model):
 
 
 class PostInProcess(models.Model):
-    STATUSES = WAITING_FOR_FILL, LAUNCHED = range(2)
+
+    company_logo = models.ImageField(null=True, default=None)
+    STATUSES = WAITING_FOR_FILL, LAUNCHED, FINISHED = range(3)
     status = models.IntegerField(choices=zip(STATUSES,STATUSES))
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=False)
     company_name = models.CharField(max_length=500, default="not_filled")
     requirements = models.CharField(max_length=10000, default="not_filled")
     ceil = models.IntegerField(default=100)
+    repost_cnt = models.IntegerField(default=0)
+    deadline = models.DateField(default=datetime.datetime.now)
+    author = models.CharField(max_length=200, default="not_filled")
+    percentage_val = models.IntegerField(default=0)
 
     def repost(self, user):
         try:
-            mr = Repost.objects.get(reposter = user, post = self)
+            mr = Repost.objects.get(reposter = user, post = self.post)
             return "already_was_reposted_by_this_user"
         except Repost.DoesNotExist:
             pass
 
-        nr = Repost(reposter = user, post = self)
+        nr = Repost(reposter = user, post = self.post)
         nr.save()
-        if (self.repost_amount >= self.ceil_done):
-            self.post_status = self.DONE
+        if (self.repost_amount >= self.ceil):
+            self.post.post_status = self.post.DONE
+            self.status = self.FINISHED
+            self.post.save()
+            report = Report(post_in_process=self, status=Report.INACTIVE)
+            report.save()
         self.save()
         return status.HTTP_200_OK
 
     @property
     def percentage(self):
-        return (self.repost_amount * 1.0 / self.ceil * 1.0)
+        return (self.repost_amount / self.ceil)
 
     @property
     def repost_amount(self):
-        all_repost = Repost.objects.filter(post=self)
+        all_repost = Repost.objects.filter(post=self.post)
         return all_repost.count()
 
     def __str__(self):
@@ -96,11 +106,13 @@ class PostInProcess(models.Model):
 
 
 class Report(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    title = models.CharField(max_length=500)
-    text = models.CharField(max_length=500)
-    image = models.ImageField()
-    youtube_link = models.CharField(max_length=500)
+    STATUSES = INACTIVE, ACTIVE = range(2)
+    status = models.IntegerField(choices=zip(STATUSES, STATUSES), default=INACTIVE)
+    post_in_process = models.ForeignKey(PostInProcess, on_delete=models.CASCADE, null=True, default=None)
+    title = models.CharField(max_length=500, default='not_filled')
+    text = models.CharField(max_length=500, default='not_filled')
+    image = models.ImageField(default=None)
+    youtube_link = models.CharField(max_length=500, default="not-filled.com")
 
 
 class Like(models.Model):

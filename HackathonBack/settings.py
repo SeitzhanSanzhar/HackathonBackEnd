@@ -49,6 +49,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 ]
 
+CORS_ORIGIN_WHITELIST = (
+    'hostname.example.com'
+    '10.10.113.168:8000'
+)
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

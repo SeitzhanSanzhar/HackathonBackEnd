@@ -31,7 +31,7 @@ class Signup(APIView):
                                             password=request.data.get('password'))
 
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+            return Response({'token': token.key, 'username': user.username}, status=status.HTTP_201_CREATED)
         except IntegrityError:
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
