@@ -34,6 +34,12 @@ class Post(models.Model):
             self.post_status = self.IN_PROGRESS
             post_in_process = PostInProcess(post=self, status = PostInProcess.WAITING_FOR_FILL)
             post_in_process.save()
+            all_likes = Like.objects.filter(post = self)
+            self.save()
+            from .send_mail import send_answer
+            for x in all_likes:
+                id = x.liker.id
+                send_answer(id)
 
         self.save()
         return status.HTTP_200_OK

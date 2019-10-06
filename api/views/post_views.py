@@ -110,12 +110,11 @@ def is_liked(request):
     except Like.DoesNotExist:
         return Response(False)
 
-@api_view(['GET'])
+@api_view(['POST'])
 def get_report(request):
     pk = request.data.get('post_id')
     token = Token.objects.get(key=request.auth)
-    post = Post.objects.get(id=pk)
-    post_in_process = PostInProcess.objects.get(post = post)
+    post_in_process = PostInProcess.objects.get(id = pk)
     report = Report.objects.get(post_in_process=post_in_process)
     report_ser = ReportSerializer(report)
     return Response(report_ser.data)
